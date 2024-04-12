@@ -7,6 +7,6 @@
 
 ### Architecture 
 
-![dbrxr architecture](images/DBRXR.png "High Level Architecture")
+![dbrxr architecture](images/dbrxr_arch.png "High Level Architecture")
 
 
