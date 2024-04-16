@@ -35,7 +35,7 @@ def main():
 
     if (api_token == None):
         log.error("DBRX_API_TOKEN is None. No cluster id specified.")
-        log.error("Program can't conitnue without a valid API token. This is needed to authenticate to the Databricks cluster.")
+        log.error("Program can't continue without a valid API token. This is needed to authenticate to the Databricks cluster.")
         sys.exit(1)
 
     cluster = DBRXCluster(api_url, api_token)

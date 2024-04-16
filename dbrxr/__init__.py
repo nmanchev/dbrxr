@@ -14,7 +14,7 @@
 
 """Init."""
 __version__ = "0.0.1"
-__author__ = "nikolay.manchev@databricks.com"
+__author__ = "nick@manchev.org"
 
 import requests
 import logging
