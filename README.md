@@ -66,12 +66,62 @@ The next step is to create an [execution context](https://docs.databricks.com/en
 cluster.create_context("my_execution_context")
 ```
 
-At this point, if `rpy2` is not already present on the cluster `dbrxr` will try to install it on the fly as this is a critical requirement. Note that if needed, other packaged can be also installed dynamically in the context. However, keep in mind that these installations are ephemeral and is better to have the required packages included in the init script if they are required permanently. Here is an example that installs `systemml` and ``
+At this point, if `rpy2` is not already present on the cluster `dbrxr` will try to install it on the fly as this is a critical requirement. Note that if needed, other packaged can also be installed dynamically in the context via `install_py_package(<package_name>)` and `install_R_package(<package_name>)`. However, keep in mind that these installations are ephemeral and is better to have the required packages included in the init script if they are required permanently. Here we will install `mlflow` as want to pull a model from MLflow and do some scoring.
 
 ```python
-# Installing a Python package
-cluster.install_py_package("systemml")
-
 # Installing an R package
-cluster.install_R_package("onnx")
+cluster.install_R_package("mlflow")
+```
+
+Assuming that we have an MLflow ready model (we use Wine Quality for this example) and know its `run_id`, we can now score some data as follows:
+
+```python
+wine_quality_runid = "..." # Set to the correct run id in your environment
+    
+# Now let's write some R code that will generate some "unseen" data and call the model for inference
+r_code = f'''library(mlflow)
+
+# Create some test data
+column_names <- c("fixed.acidity", "volatile.acidity", "citric.acid", "residual.sugar", "chlorides", "free.sulfur.dioxide", "total.sulfur.dioxide", "density", "pH", "sulphates", "alcohol")
+data_matrix <- matrix(data =  c(7.4,0.7,0,1.9,0.076,11,34,0.9978,3.51,0.56,9.4,
+                                7.8,0.88,0,2.6,0.098,25,67,0.9968,3.2,0.68,9.8,
+                                7.8,0.76,0.04,2.3,0.092,15,54,0.997,3.26,0.65,9.8,
+                                11.2,0.28,0.56,1.9,0.075,17,60,0.998,3.16,0.58,9.8,
+                                7.4,0.7,0,1.9,0.076,11,34,0.9978,3.51,0.56,9.4),
+                                nrow = 5, ncol = length(column_names))
+colnames(data_matrix) <- column_names
+df <- as.data.frame(data_matrix)
+
+# Connect to MLflow and pull the model. Inject the Databricks host & token for MLflow authentication
+Sys.setenv(DATABRICKS_HOST = "{databricks_host}", "DATABRICKS_TOKEN" = "{api_token}")
+
+model_uri <- "runs:/{wine_quality_runid}/model"
+best_model <- mlflow_load_model(model_uri = model_uri)
+
+# Score the data
+predictions <- data.frame(mlflow_predict(best_model, data = df))          
+toString(predictions[[1]])
+'''
+
+# Run the R code and print the predictions
+predictions = cluster.execute_R(r_code)
+print(predictions["results"]["data"])
+```
+
+The above should result in an output similar to this:
+
+```
+INFO:dbrxr:Command submitted with run ID: 843f91232192424baa81e750858c7969
+INFO:dbrxr:Command 843f91232192424baa81e750858c7969 is in Running state...
+INFO:dbrxr:Command 843f91232192424baa81e750858c7969 is in Running state...
+INFO:dbrxr:Command 843f91232192424baa81e750858c7969 is in Running state...
+INFO:dbrxr:Command 843f91232192424baa81e750858c7969 completed with status: Finished
+Out[3]: '"8.41718559792617, 4.70644087390404, 5.06829476264763, 4.97491412968916, 5.65455027757358"'
+INFO:dbrxr:Execution context 0207-163637-8hwxmqwd destroyed.
+```
+
+After we are finished with the context, it is a good practice to destroy it.
+
+```python
+cluster.destroy_context()
 ```
