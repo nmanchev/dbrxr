@@ -125,3 +125,9 @@ After we are finished with the context, it is a good practice to destroy it.
 ```python
 cluster.destroy_context()
 ```
+
+## Project support and final notes
+
+**DISCLAIMER**: *This is a prototype/workaround demonstration. It is not officially endorsed or supported by Databricks.*
+
+Also, the code that installs packages just concatenates package names and submits them for execution. This is bad from a security standpoint as it can be used for injection attacks. I'll be enhancing the code to do some rudimentary filtering and only accept valid R/Python package names in the near future. However, keep in mind that whatever input filtering is implemented, it will be done on the client side nevertheless.
