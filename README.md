@@ -76,7 +76,7 @@ cluster.install_R_package("mlflow")
 Assuming that we have an MLflow ready model (we use Wine Quality for this example) and know its `run_id`, we can now score some data as follows:
 
 ```python
-wine_quality_runid = "..." # Set to the correct run id in your environment
+wine_quality_runid = "..." # Set to the correct run id in your environment (i.e. the one provided by wine_model.R)
     
 # Now let's write some R code that will generate some "unseen" data and call the model for inference
 r_code = f'''library(mlflow)
