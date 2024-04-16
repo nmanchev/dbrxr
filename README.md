@@ -117,7 +117,6 @@ INFO:dbrxr:Command 843f91232192424baa81e750858c7969 is in Running state...
 INFO:dbrxr:Command 843f91232192424baa81e750858c7969 is in Running state...
 INFO:dbrxr:Command 843f91232192424baa81e750858c7969 completed with status: Finished
 Out[3]: '"8.41718559792617, 4.70644087390404, 5.06829476264763, 4.97491412968916, 5.65455027757358"'
-INFO:dbrxr:Execution context 0207-163637-8hwxmqwd destroyed.
 ```
 
 After we are finished with the context, it is a good practice to destroy it.
