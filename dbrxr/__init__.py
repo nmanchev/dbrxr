@@ -134,27 +134,28 @@ class DBRXCluster(object):
             
         return False
 
-    def install_R_package(self, package:str)->bool:
+    def install_R_package(self, package:str, verbose=False)->bool:
 
         self.log.info(f"Installing R package {package} in context {self._context}.")
 
         if (self._r_package_installed(package)):
            return True       
         else:
-            code = f"""import subprocess
-
-                      subprocess.check_output(['pip', 'install', {package}])"""
+            code = f"""
+            import subprocess
+            subprocess.check_output(['R', '-e', "install.packages('{package}', dependencies=TRUE, repos='http://cran.rstudio.com/')"])"""
             
-            self._execute(code)
-            self.log.info(f"Checking if Python package {package} installation succeeded.")
-            return self._package_installed(package)
+            ex_output = self._execute(code)
+            if verbose:
+                self.log.info(ex_output)
+            
+            self.log.info(f"Checking if R package {package} installation succeeded.")
+            return self._r_package_installed(package)
             
         return False
 
     def _r_package_installed(self, package:str)->bool:
  
-        #code=f"""("{package}" %in% rownames(installed.packages()))"""
-
         code = f"""
                 import rpy2.robjects as robjects
                 res = robjects.r('''"{package}" %in% rownames(installed.packages())''')
@@ -167,9 +168,12 @@ class DBRXCluster(object):
             if (res_type == "text") and (res["results"]["data"] == "TRUE"):
                 self.log.info(f"Success. Package {package} is installed in context {self._context}.")
                 return True
+            elif (res_type == "text") and (res["results"]["data"] == "FALSE"):
+                self.log.info(f"{package} is not installed in context {self._context}.")
+                return False
             elif res_type == "error":
-                self.log.info(f"Failure. Package {package} is NOT installed in context {self._context}.")
-                return False 
+                self.log.info(f"Failure. Can't check the state of {package} in context {self._context}.")
+                raise 
             else:
                 self.log.warn(f"Can't parse the response from the execution.\n {res}")
                 raise
@@ -186,7 +190,7 @@ class DBRXCluster(object):
             import {package}
             print("Success")
         except ImportError as e:
-            raise
+            print("Failure")
         """
 
         res = self._execute(code)
@@ -195,9 +199,12 @@ class DBRXCluster(object):
             if (res_type == "text") and (res["results"]["data"] == "Success"):
                 self.log.info(f"Success. Package {package} is installed in context {self._context}.")
                 return True
+            elif (res_type == "text") and (res["results"]["data"] == "Failure"):
+                self.log.info(f"{package} is not installed in context {self._context}.")
+                return False
             elif res_type == "error":
-                self.log.info(f"Failure. Package {package} is NOT installed in context {self._context}.")
-                return False 
+                self.log.info(f"Failure. Can't check the state of {package} in context {self._context}.")
+                raise 
             else:
                 self.log.warn(f"Can't parse the response from the execution.\n {res}")
                 raise

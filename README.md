@@ -43,4 +43,35 @@ First, we need to set a number of environment variables to provide the following
 * DBRX_API_TOKEN - [Access token](https://docs.databricks.com/en/dev-tools/auth/pat.html) for authentication to the cluster (and MLflow, if needed) 
 * CLUSTER_ID - The unique [cluster ID](https://docs.databricks.com/en/workspace/workspace-details.html) identifying the target cluster
 
+Next, we need to create a `DBRXCluster` instance 
 
+```python
+import os
+
+from dbrxr import DBRXCluster
+
+api_token = os.environ.get("DBRX_API_TOKEN")
+databricks_host = os.environ.get("DBRX_HOST")
+api_url = databricks_host + "/api/1.2" # Update to reflect the relevant API version
+
+cluster = DBRXCluster(api_url, api_token)
+cluster.cluster_id = cluster_id
+```
+
+Note that `cluster_id` is set outside of the constructor. This is because once created, the `DBRXCluster` can be used to interact with different clusters within the same workspace.
+
+The next step is to create an [execution context](https://docs.databricks.com/en/notebooks/execution-context.html).
+
+```python
+cluster.create_context("my_execution_context")
+```
+
+At this point, if `rpy2` is not already present on the cluster `dbrxr` will try to install it on the fly as this is a critical requirement. Note that if needed, other packaged can be also installed dynamically in the context. However, keep in mind that these installations are ephemeral and is better to have the required packages included in the init script if they are required permanently.
+
+```python
+# Installing a Python package
+
+
+# Installing an R package
+cluster.install_R_package("mlflow")
+```
