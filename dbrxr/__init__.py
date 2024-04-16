@@ -116,7 +116,7 @@ class DBRXCluster(object):
         return False
 
 
-    def install_py_package(self, package:str)->bool:
+    def install_py_package(self, package:str, verbose=False)->bool:
 
         self.log.info(f"Installing Python package {package} in context {self._context}.")
 
@@ -125,10 +125,14 @@ class DBRXCluster(object):
             return True
         
         else:
-            code = f"""import subprocess
-                       subprocess.check_output(['pip', 'install', {package}])"""
+            code = f"""
+            import subprocess
+            subprocess.check_output(['pip', 'install', '{package}'])"""
             
-            self._execute(code)
+            ex_output = self._execute(code)
+            if verbose:
+                self.log.info(ex_output)
+
             self.log.info(f"Checking if Python package {package} installation succeeded.")
             return self._python_package_installed(package)
             
@@ -173,6 +177,7 @@ class DBRXCluster(object):
                 return False
             elif res_type == "error":
                 self.log.info(f"Failure. Can't check the state of {package} in context {self._context}.")
+                self.log.info(res)
                 raise 
             else:
                 self.log.warn(f"Can't parse the response from the execution.\n {res}")
@@ -204,6 +209,7 @@ class DBRXCluster(object):
                 return False
             elif res_type == "error":
                 self.log.info(f"Failure. Can't check the state of {package} in context {self._context}.")
+                self.log.info(res)
                 raise 
             else:
                 self.log.warn(f"Can't parse the response from the execution.\n {res}")

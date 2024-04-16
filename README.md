@@ -66,12 +66,12 @@ The next step is to create an [execution context](https://docs.databricks.com/en
 cluster.create_context("my_execution_context")
 ```
 
-At this point, if `rpy2` is not already present on the cluster `dbrxr` will try to install it on the fly as this is a critical requirement. Note that if needed, other packaged can be also installed dynamically in the context. However, keep in mind that these installations are ephemeral and is better to have the required packages included in the init script if they are required permanently.
+At this point, if `rpy2` is not already present on the cluster `dbrxr` will try to install it on the fly as this is a critical requirement. Note that if needed, other packaged can be also installed dynamically in the context. However, keep in mind that these installations are ephemeral and is better to have the required packages included in the init script if they are required permanently. Here is an example that installs `systemml` and ``
 
 ```python
 # Installing a Python package
-
+cluster.install_py_package("systemml")
 
 # Installing an R package
-cluster.install_R_package("mlflow")
+cluster.install_R_package("onnx")
 ```
