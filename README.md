@@ -6,7 +6,7 @@
 
 **DISCLAIMER**: *This is a prototype/workaround demonstration. It is not officially endorsed or supported by Databricks.*
 
-### Architecture
+## Architecture
 
 This diagram outlines the architecture of the solution.
 
@@ -32,6 +32,10 @@ robjects.r('''
 ```
 
 On the other hand, the Databricks execution API allows us to submit Python, Scala, and SQL code for execution on a remote cluster. Combining the two gives us a mechanism to run the R code listed above onto a designated cluster (Cluster 1 in the diagram above). Note, that we need to use this workaround as direct submission of R code via the [Command Execution API](https://docs.databricks.com/api/workspace/commandexecution) is currently not supported. `dbrxr` is an MVP demo, which shows how this can be leveraged to run arbitrary R code, including scoring endpoints for R models.
+
+## Prerequisites
+
+This prototype has been tested with both Assigned and No Isolation Shared access modes, using 12.2 LTS ML runtime.
 
 ## Usage
 
